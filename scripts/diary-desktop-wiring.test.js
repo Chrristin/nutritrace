@@ -47,8 +47,8 @@ test('Diary has a .diary-right-col that is hidden by default and shown ≥1280px
 
 // ── Meal column-pack split (Phase 5) ──────────────────────────────────────
 test('Diary computes mealsLeft and mealsRight via index parity', () => {
-  assert.match(diarySrc, /mealsLeft\s*=\s*mealLayout\.filter\(m\s*=>\s*m\.mealIdx\s*%\s*2\s*===\s*0\)/);
-  assert.match(diarySrc, /mealsRight\s*=\s*mealLayout\.filter\(m\s*=>\s*m\.mealIdx\s*%\s*2\s*===\s*1\)/);
+  assert.match(diarySrc, /mealsLeft\s*=\s*(?:mealLayout|_shownMeals)\.filter\(m\s*=>\s*m\.mealIdx\s*%\s*2\s*===\s*0\)/);
+  assert.match(diarySrc, /mealsRight\s*=\s*(?:mealLayout|_shownMeals)\.filter\(m\s*=>\s*m\.mealIdx\s*%\s*2\s*===\s*1\)/);
 });
 
 test('Diary renders meals via a snippet consumed twice (once per column)', () => {

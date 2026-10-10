@@ -77,3 +77,76 @@ html.calm .qty-macros {
 html.calm .qty-macro-pill { background: none !important; }
 html.calm .qty-macro-pill .qty-macro-val { color: var(--text-1) !important; }
 html.calm .qty-macro-pill:first-child .qty-macro-val { color: var(--accent) !important; }
+
+/* ── Colour and contrast ────────────────────────────────────────────────
+   The stock palette uses four saturated macro colours, and secondary text
+   at 35-60% opacity, which goes muddy on the dark theme. Calm look mutes
+   the macros to soft, related tones and lifts secondary text so it reads. */
+html.calm[data-theme="dark"],
+html.calm [data-theme="dark"] {
+  --text-2: rgba(240, 242, 248, 0.80);
+  --text-3: rgba(240, 242, 248, 0.62);
+  --border: rgba(255, 255, 255, 0.06);
+  --macro-protein:  #B9B4D6;
+  --macro-carbs:    #A9C7B5;
+  --macro-fat:      #D9C3A0;
+  --macro-calories: #F0F2F8;
+  --macro-protein-dim:  rgba(185,180,214,0.10);
+  --macro-carbs-dim:    rgba(169,199,181,0.10);
+  --macro-fat-dim:      rgba(217,195,160,0.10);
+  --macro-calories-dim: rgba(240,242,248,0.06);
+}
+html.calm[data-theme="light"],
+html.calm [data-theme="light"] {
+  --text-2: rgba(13, 15, 20, 0.74);
+  --text-3: rgba(13, 15, 20, 0.56);
+  --macro-protein:  #6E668F;
+  --macro-carbs:    #557A64;
+  --macro-fat:      #8F7350;
+  --macro-calories: #0D0F14;
+  --macro-protein-dim:  rgba(110,102,143,0.08);
+  --macro-carbs-dim:    rgba(85,122,100,0.08);
+  --macro-fat-dim:      rgba(143,115,80,0.08);
+  --macro-calories-dim: rgba(13,15,20,0.05);
+}
+
+/* Meal icons and the coloured empty-meal glyphs: one quiet tone */
+html.calm .meal-type-icon { color: var(--text-3) !important; opacity: 1; }
+
+/* Header buttons: plain icons, not tinted tiles */
+html.calm .page-header .btn-icon,
+html.calm .diary-topbar-actions .btn-icon {
+  background: none;
+  box-shadow: none;
+  border: none;
+}
+
+/* Fewer lines: cards sit on spacing, not outlines */
+html.calm .meal-group { border: none; }
+html.calm .diary-item { border-bottom: none; }
+
+/* Bottom summary: one calorie progress line instead of three stacked
+   colour strips. Tap it to expand the full breakdown, as before. */
+html.calm .dbb-macro-bar,
+html.calm .dbb-water-strip { display: none; }
+html.calm .dbb-progress-fill { background: var(--accent) !important; }
+
+/* "Add a meal" row (Diary.svelte, calm only) */
+.calm-add-meal { display: flex; flex-direction: column; gap: 10px; padding: 6px 4px 20px; }
+.calm-add-meal-label { font-size: 13px; color: var(--text-3); padding-left: 4px; }
+.calm-add-meal-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.calm-add-meal-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  color: var(--text-1);
+  font: inherit; font-size: 14px;
+  cursor: pointer;
+}
+.calm-add-meal-chip .material-symbols-rounded { font-size: 18px; color: var(--accent); }
+
+/* Date arrows and Day Notes: no tinted tiles, no accent edge */
+html.calm .diary-date-bar .btn-icon { background: none; box-shadow: none; border: none; }
+html.calm .diary-notes { border-left: none; }

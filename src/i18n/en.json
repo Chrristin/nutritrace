@@ -650,6 +650,9 @@
     }
   },
   "diary": {
+    "calm": {
+      "add_meal": "Add a meal"
+    },
     "add_food": "Add Food",
     "notes_placeholder": "How did today feel? Sleep, energy, hunger, cravings…",
     "quick_calories": {

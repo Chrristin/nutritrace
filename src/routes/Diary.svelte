@@ -57,7 +57,7 @@
            diaryRailShowSummary, diaryRailShowWater, diaryRailShowBodyStats,
            diaryRailShowActivity as diaryRailShowActivityWidget,
            diaryRailShowNotes,
-           forceMobileLayout } from '../stores/settings.js';
+           forceMobileLayout, calmLook } from '../stores/settings.js';
   import { dayActivity, activitySummary, loadActivity, deleteActivity } from '../stores/activity.js';
   import WaterBanner  from '../components/banners/WaterBanner.svelte';
   import { editorState } from '../stores/editorState.js';
@@ -1276,8 +1276,17 @@
       isEmpty:   items.length === 0,
     };
   });
-  $: mealsLeft  = mealLayout.filter(m => m.mealIdx % 2 === 0);
-  $: mealsRight = mealLayout.filter(m => m.mealIdx % 2 === 1);
+  // Calm look: only meals that have something in them are shown. An empty
+  // day starts with the first meal; the rest are one tap away in the
+  // "Add a meal" row below the cards. Items logged elsewhere (another
+  // device, MCP, the API) land in their meal and that meal simply appears.
+  $: _calmAnyItems = mealLayout.some(m => !m.isEmpty);
+  $: _shownMeals = $calmLook
+    ? mealLayout.filter(m => !m.isEmpty || (!_calmAnyItems && m.mealIdx === 0))
+    : mealLayout;
+  $: _calmHiddenMeals = $calmLook ? mealLayout.filter(m => !_shownMeals.includes(m)) : [];
+  $: mealsLeft  = _shownMeals.filter(m => m.mealIdx % 2 === 0);
+  $: mealsRight = _shownMeals.filter(m => m.mealIdx % 2 === 1);
 
   // Nutrition bar: visible NUTRIMENTS that have goals set
   $: nutritionBarItems = (() => {
@@ -2396,6 +2405,18 @@
           {/each}
         </div>
       </div>
+      {#if _calmHiddenMeals.length > 0}
+        <div class="calm-add-meal">
+          <span class="calm-add-meal-label">{$_('diary.calm.add_meal')}</span>
+          <div class="calm-add-meal-chips">
+            {#each _calmHiddenMeals as m (m.mealIdx)}
+              <button type="button" class="calm-add-meal-chip" on:click={() => openAddFood(m.mealIdx)}>
+                <span class="material-symbols-rounded">add</span>{m.meal}
+              </button>
+            {/each}
+          </div>
+        </div>
+      {/if}
     {/key}
 
     {#if $diaryShowActivity}
