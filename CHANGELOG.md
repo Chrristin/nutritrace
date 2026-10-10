@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **All opens on your own list until you type.** With All as the source and nothing typed, the Foods page showed only a "type to search" hint, so making All your default source meant opening the picker to an empty page. It now shows your own foods, meals or recipes until you type, then searches every source as before.
+
 ---
 
 ## [1.4.0] - 2026-10-09

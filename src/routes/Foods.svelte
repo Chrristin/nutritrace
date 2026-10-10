@@ -2149,14 +2149,11 @@
   {/if}
 
   <div class="page-content">
-    {#if searchSource === 'all'}
+    {#if searchSource === 'all' && search.trim()}
       <!-- ── All: merged results from every enabled source ─────────────────── -->
-      {#if !search.trim()}
-        <div class="empty-state">
-          <span class="material-symbols-rounded empty-icon">search</span>
-          <p>{$_('foods.all_mode.search_hint')}</p>
-        </div>
-      {:else if (loading || mealieLoading || cooktraceLoading || ctPantryLoading) && _allModeItems.length === 0}
+      <!-- With nothing typed, All falls through to the local list below, so
+           the page opens on your own foods instead of an empty search hint. -->
+      {#if (loading || mealieLoading || cooktraceLoading || ctPantryLoading) && _allModeItems.length === 0}
         <div class="loading-row">
           <span class="material-symbols-rounded spin">refresh</span>
           <span class="text-2 text-sm">{$_('foods.all_mode.searching')}</span>
@@ -2306,7 +2303,7 @@
         {/if}
       {/if}
 
-    {:else if searchSource === 'local' || searchSource === 'shared' || (activeTab !== 0 && searchSource !== 'cooktrace')}
+    {:else if searchSource === 'all' || searchSource === 'local' || searchSource === 'shared' || (activeTab !== 0 && searchSource !== 'cooktrace')}
       <!-- ── Local list ─────────────────────────────────────────────────────── -->
       {#if _initialLoading && filteredList.length === 0 && !loadError}
         <!-- #178 — hold the empty state while the initial fetch is in
