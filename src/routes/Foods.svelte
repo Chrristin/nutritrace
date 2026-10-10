@@ -2780,7 +2780,7 @@
         bind:this={_qtyPromptServingsEl} data-field="servings"
         style="font-size:16px;width:100%" />
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md)">
+    <div class="qty-total" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2);border-radius:var(--radius-md)">
       <span style="font-size:13px;color:var(--text-3)">{$_('foods_deep.total_amount')}</span>
       <span style="font-size:14px;font-weight:500">{Math.round((parseDecimal(promptPortion) || 100) * (parseDecimal(promptServings) || 1) * 10) / 10}{promptUnit || 'g'}</span>
     </div>

@@ -1,0 +1,79 @@
+/* ── Calm look ─────────────────────────────────────────────────────────────
+   Opt-in skin, gated on html.calm (Settings → Appearance → Calm look).
+   Goal: fewer boxes, fewer buttons, fewer colours competing for attention.
+   Everything here is presentation only; every hidden control is still
+   reachable another way (noted per rule). Selectors start with html.calm
+   so they outrank the components' scoped styles without !important. */
+
+/* Diary: meal cards lose the coloured left edge and read as plain cards */
+html.calm .meal-group {
+  border-left: none;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+html.calm .meal-header {
+  padding: 14px 16px 8px;
+  border-bottom: none;
+}
+html.calm .meal-name { font-size: 16px; font-weight: 600; }
+html.calm .meal-type-icon { opacity: 0.6; }
+
+/* One way to add food. The header "+" duplicates the "Add food" row and
+   the empty-meal "Tap to add food" button, both of which stay. */
+html.calm .meal-header .btn-icon.accent { display: none; }
+
+/* Meal actions (⋮) stay, but as a quiet icon instead of a filled button */
+html.calm .meal-header .meal-menu-btn {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--text-3);
+  width: 32px;
+  height: 32px;
+}
+/* Meal kcal sits right after the name, quietly */
+html.calm .meal-header .meal-kcal { color: var(--text-3); }
+
+/* Items: no empty placeholder tiles; real photos still show */
+html.calm .item-thumb-placeholder { display: none; }
+html.calm .diary-item { border-bottom-color: transparent; padding: 8px 16px; }
+
+/* Empty meal: a plain line, not a big tinted target */
+html.calm .meal-empty { padding: 4px 16px 14px; }
+html.calm .meal-empty-icon { display: none; }
+html.calm .meal-empty-text { font-size: 14px; color: var(--accent); font-weight: 500; }
+
+html.calm .meal-add-row {
+  border-top: none;
+  padding: 6px 16px 12px;
+  color: var(--accent);
+}
+
+/* Foods: a list, not a stack of cards */
+html.calm .food-list { gap: 0; }
+html.calm .food-list .food-item {
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  box-shadow: none;
+  background: transparent;
+}
+html.calm .food-list .food-item:first-child { border-top: 1px solid var(--border); }
+html.calm .food-list .food-item-btn { padding: 12px 4px; }
+html.calm .food-name { font-size: 15px; }
+/* No placeholder tiles in the food list either; real photos still show */
+html.calm .food-thumb-placeholder { display: none; }
+
+/* Portion sheet: the "Total amount" row restates the two fields above it.
+   !important because the row's layout is an inline style. */
+html.calm .qty-total { display: none !important; }
+/* Macro preview in one neutral strip instead of four coloured tiles */
+html.calm .qty-macros {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 0;
+}
+html.calm .qty-macro-pill { background: none !important; }
+html.calm .qty-macro-pill .qty-macro-val { color: var(--text-1) !important; }
+html.calm .qty-macro-pill:first-child .qty-macro-val { color: var(--accent) !important; }

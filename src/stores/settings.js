@@ -80,6 +80,7 @@ export const USER_PREFS = new Set([
   'appriseUrl','appriseTag','gotifyUrl','gotifyToken','ntfyUrl','ntfyTopic','ntfyToken',
   // UI behavior prefs that should match across devices
   'accentColor','startPage','goalCelebrations','pageBanners','bannerStyle','bannerAnimation','language',
+  'calmLook',
 ]);
 
 // DEVICE_PREFS — local-only, never synced.
@@ -757,6 +758,17 @@ export const sidebarPersistent = createSettingStore('sidebarPersistent', false);
 export const startPage         = createSettingStore('startPage',         '/');
 export const disableAnimations  = createSettingStore('disableAnimations',  false);
 export const goalCelebrations   = createSettingStore('goalCelebrations',   true);
+// Calm look: a quieter skin (src/styles/calm.css, gated on html.calm) plus
+// a one-time preset of existing display settings, applied when it is turned
+// on. Each preset setting stays individually adjustable afterwards.
+export const calmLook           = createSettingStore('calmLook',           false);
+export function applyCalmPreset() {
+  bannerStyle.set('off');
+  showQuickCalories.set(false);
+  diaryShowMacroSummary.set(false);
+  foodsShowThumbnails.set(false);
+  foodsDefaultSource.set('all');
+}
 
 // Date / time display format
 export const dateFormat = createSettingStore('dateFormat', 'US');   // 'ISO' | 'US' | 'EU' | 'natural'
