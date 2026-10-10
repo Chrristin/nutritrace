@@ -16,7 +16,10 @@ android {
     namespace = "com.nutritrace.app"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.nutritrace.app"
+        // Personal build: its own app id so it installs beside the official
+        // NutriTrace app instead of clashing with its signature. The Java/
+        // Kotlin package (namespace) stays com.nutritrace.app.
+        applicationId "com.nutritrace.app.calm"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 176
