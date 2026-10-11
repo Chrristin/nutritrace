@@ -1375,6 +1375,8 @@
     "lookup": "Look Up"
   },
   "food_editor": {
+    "calm_mine": "Mine only",
+    "calm_mine_desc": "Keep this to yourself instead of sharing it with the household.",
     "off_prepared": {
       "only_prepared": "Open Food Facts only lists this product \"as prepared\": {kcal} kcal per 100 {unit}. That is how it is served (made up, drained or cooked), which may not be how you weigh it.",
       "use": "Use These Values",

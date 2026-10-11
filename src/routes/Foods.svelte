@@ -67,7 +67,7 @@
     if (activeTab !== 0 && searchSource !== 'local' && searchSource !== 'shared' && searchSource !== 'mine'
         && !(activeTab === 2 && searchSource === 'cooktrace')) searchSource = 'local';
     if (searchSource === 'shared' && !_tabHasShared) searchSource = 'local';
-    if (searchSource === 'mine' && !_tabHasShared) searchSource = 'local';
+    if (searchSource === 'mine' && !$calmLook) searchSource = 'local';
   }
 
   // Reset scroll so the new tab starts from the top.
@@ -109,9 +109,10 @@
   // is only offered when it actually merges something. Fires everything in
   // parallel and shows results grouped by source with per-row source badges.
   $: _perSourceOptions = [
-    { value: 'local',  label: ($calmLook && _tabHasShared) ? $_('foods.sources.household') : $_('foods.sources.local') },
-    // Calm look, household: Mine = only your own items, private ones included.
-    ...($calmLook && _tabHasShared ? [{ value: 'mine', label: $_('foods.sources.mine') }] : []),
+    { value: 'local',  label: $calmLook ? $_('foods.sources.household') : $_('foods.sources.local') },
+    // Calm look, household: Local reads Household (everything you and the
+    // people sharing with you have). Mine = your items kept private.
+    ...($calmLook ? [{ value: 'mine', label: $_('foods.sources.mine') }] : []),
     ...(activeTab === 0 && $offEnabled    ? [{ value: 'off',    label: 'OFF' }] : []),
     ...(activeTab === 0 && $usdaEnabled   ? [{ value: 'usda',   label: 'USDA' }] : []),
     ...(activeTab === 0 && _mealieEnabled ? [{ value: 'mealie', label: 'Mealie' }] : []),
@@ -613,10 +614,16 @@
   // sorted together, instead of on a separate "From Others" shelf. Picking
   // one logs it directly; it is not copied into your catalogue.
   $: _sortMode = activeTab === 0 ? $foodsSort : activeTab === 1 ? $mealsSort : $recipesSort;
-  $: _householdList = ($calmLook && _tabHasShared)
+  $: _householdList = ($calmLook && (_groupList || []).length)
     ? _applySort([...(_ownList || []), ...(_groupList || [])], _sortMode)
     : _ownList;
-  $: displayList = searchSource === 'shared' ? _groupList : searchSource === 'mine' ? _ownList : _householdList;
+  // Calm look: every item is either Household (shared: yours or someone
+  // else's) or Mine (yours, kept private). All, with nothing typed, shows both.
+  $: _isMine = f => (f.visibility || 'private') === 'private';
+  $: displayList = searchSource === 'shared' ? _groupList
+    : searchSource === 'mine' ? (_ownList || []).filter(_isMine)
+    : ($calmLook && searchSource === 'local') ? _householdList.filter(f => f._shared_by != null || !_isMine(f))
+    : _householdList;
   let _householdLoadTried = false;
   $: { if ($calmLook && _tabHasShared && !_householdLoadTried && !groupFoods.length && !groupMeals.length && !groupRecipes.length) { _householdLoadTried = true; loadGroupCatalogue(); } }
   $: { if (searchSource === 'shared' && _tabHasShared && !groupFoods.length && !groupMeals.length && !groupRecipes.length) loadGroupCatalogue(); }
@@ -2280,7 +2287,7 @@
           {@const _localCount = (_ownList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length}
           {@const _sharedCount = _tabHasShared ? (_groupList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length : 0}
           <div class="all-source-counts">
-            <span class="asc-chip"><span class="asc-dot asc-local"></span>{$calmLook && _tabHasShared ? $_('foods.sources.household') : 'Local'} · {_localCount + ($calmLook ? _sharedCount : 0)}</span>
+            <span class="asc-chip"><span class="asc-dot asc-local"></span>{$calmLook ? $_('foods.sources.household') : 'Local'} · {_localCount + ($calmLook ? _sharedCount : 0)}</span>
             {#if _tabHasShared}
               <span class="asc-chip"><span class="asc-dot asc-shared"></span>Shared · {_sharedCount}</span>
             {/if}
