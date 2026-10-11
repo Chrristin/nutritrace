@@ -64,9 +64,10 @@
     refreshSharingStatus();
     // Non-foods tabs only support local + shared — silently reset if the
     // current source isn't valid here (toast removed; common-sense reset).
-    if (activeTab !== 0 && searchSource !== 'local' && searchSource !== 'shared'
+    if (activeTab !== 0 && searchSource !== 'local' && searchSource !== 'shared' && searchSource !== 'mine'
         && !(activeTab === 2 && searchSource === 'cooktrace')) searchSource = 'local';
     if (searchSource === 'shared' && !_tabHasShared) searchSource = 'local';
+    if (searchSource === 'mine' && !_tabHasShared) searchSource = 'local';
   }
 
   // Reset scroll so the new tab starts from the top.
@@ -108,7 +109,9 @@
   // is only offered when it actually merges something. Fires everything in
   // parallel and shows results grouped by source with per-row source badges.
   $: _perSourceOptions = [
-    { value: 'local',  label: $_('foods.sources.local')  },
+    { value: 'local',  label: ($calmLook && _tabHasShared) ? $_('foods.sources.household') : $_('foods.sources.local') },
+    // Calm look, household: Mine = only your own items, private ones included.
+    ...($calmLook && _tabHasShared ? [{ value: 'mine', label: $_('foods.sources.mine') }] : []),
     ...(activeTab === 0 && $offEnabled    ? [{ value: 'off',    label: 'OFF' }] : []),
     ...(activeTab === 0 && $usdaEnabled   ? [{ value: 'usda',   label: 'USDA' }] : []),
     ...(activeTab === 0 && _mealieEnabled ? [{ value: 'mealie', label: 'Mealie' }] : []),
@@ -196,7 +199,7 @@
   }
   function _toggleChipInMulti(sourceValue) {
     // 'all' is meaningless in multi mode (it already IS all sources).
-    if (sourceValue === 'all') return;
+    if (sourceValue === 'all' || sourceValue === 'mine') return;
     // Guard against double-fire from contextmenu + touchstart-timer both
     // firing on the same long-press. First one wins; second and any
     // trailing synthetic click event are suppressed for 400ms.
@@ -239,6 +242,7 @@
     cooktrace: pinnedSources.size > 0 ? pinnedSources.has('cooktrace') : searchSource === 'cooktrace',
     ctpantry: pinnedSources.size > 0 ? pinnedSources.has('ctpantry') : searchSource === 'ctpantry',
     shared: pinnedSources.size > 0 ? pinnedSources.has('shared') : searchSource === 'shared',
+    mine:   pinnedSources.size === 0 && searchSource === 'mine',
     all:    pinnedSources.size === 0 && searchSource === 'all',
   };
   // Tap handler: exits multi mode and single-selects the tapped source.
@@ -612,7 +616,7 @@
   $: _householdList = ($calmLook && _tabHasShared)
     ? _applySort([...(_ownList || []), ...(_groupList || [])], _sortMode)
     : _ownList;
-  $: displayList = searchSource === 'shared' ? _groupList : _householdList;
+  $: displayList = searchSource === 'shared' ? _groupList : searchSource === 'mine' ? _ownList : _householdList;
   let _householdLoadTried = false;
   $: { if ($calmLook && _tabHasShared && !_householdLoadTried && !groupFoods.length && !groupMeals.length && !groupRecipes.length) { _householdLoadTried = true; loadGroupCatalogue(); } }
   $: { if (searchSource === 'shared' && _tabHasShared && !groupFoods.length && !groupMeals.length && !groupRecipes.length) loadGroupCatalogue(); }
@@ -863,7 +867,7 @@
     apiHasMore = false;
     // Local + shared don't need remote calls; 'all' mode always needs the
     // debounce because it fans out to external APIs alongside local filter.
-    if (!search.trim() || searchSource === 'local' || searchSource === 'shared') return;
+    if (!search.trim() || searchSource === 'local' || searchSource === 'shared' || searchSource === 'mine') return;
     const src = searchSource;
     searchTimeout = setTimeout(async () => {
       if (activeTab !== 0 && src !== 'cooktrace' && src !== 'all') return;
@@ -2276,7 +2280,7 @@
           {@const _localCount = (_ownList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length}
           {@const _sharedCount = _tabHasShared ? (_groupList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length : 0}
           <div class="all-source-counts">
-            <span class="asc-chip"><span class="asc-dot asc-local"></span>Local · {_localCount + ($calmLook ? _sharedCount : 0)}</span>
+            <span class="asc-chip"><span class="asc-dot asc-local"></span>{$calmLook && _tabHasShared ? $_('foods.sources.household') : 'Local'} · {_localCount + ($calmLook ? _sharedCount : 0)}</span>
             {#if _tabHasShared}
               <span class="asc-chip"><span class="asc-dot asc-shared"></span>Shared · {_sharedCount}</span>
             {/if}
@@ -2313,7 +2317,7 @@
         {/if}
       {/if}
 
-    {:else if searchSource === 'all' || searchSource === 'local' || searchSource === 'shared' || (activeTab !== 0 && searchSource !== 'cooktrace')}
+    {:else if searchSource === 'all' || searchSource === 'local' || searchSource === 'shared' || searchSource === 'mine' || (activeTab !== 0 && searchSource !== 'cooktrace')}
       <!-- ── Local list ─────────────────────────────────────────────────────── -->
       {#if _initialLoading && filteredList.length === 0 && !loadError}
         <!-- #178 — hold the empty state while the initial fetch is in

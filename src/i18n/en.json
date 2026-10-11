@@ -856,6 +856,8 @@
     },
     "sources": {
       "local": "Local",
+      "household": "Household",
+      "mine": "Mine",
       "from_others": "From Others",
       "all": "All",
       "shared": "Shared",
