@@ -30,7 +30,7 @@
   import { resolveAssetUrl, isNative } from '../lib/platform.js';
   import { itemSourceRef } from '../lib/item-source.js';
   import { offCountryTagToFlag, offCountryTagToName } from '../lib/off-country-flag.js';
-  import { foodsShowThumbnails, foodsShowCategories, foodsShowLabels, foodsShowNotes, foodsSort, mealsSort, recipesSort, foodCategories, foodsShowYesterdayMeals, foodsYesterdayCollapsed, foodsSavedCollapsed, mealNames, usdaEnabled, usdaApiKey, offEnabled, offSearchCountry, offSearchLanguage, foodsDefaultSource, diaryDefaultField, catName as _catName, catDisplay as _catDisplay, pageBanners, bannerStyle, energyUnit } from '../stores/settings.js';
+  import { foodsShowThumbnails, foodsShowCategories, foodsShowLabels, foodsShowNotes, foodsSort, mealsSort, recipesSort, foodCategories, foodsShowYesterdayMeals, foodsYesterdayCollapsed, foodsSavedCollapsed, mealNames, usdaEnabled, usdaApiKey, offEnabled, offSearchCountry, offSearchLanguage, foodsDefaultSource, diaryDefaultField, catName as _catName, catDisplay as _catDisplay, pageBanners, bannerStyle, energyUnit, calmLook } from '../stores/settings.js';
   import { mealIcon } from '../lib/mealIcon.js';
   import { focusDefaultField } from '../lib/default-field.js';
   import { pageScrollTop, restorePageScroll } from '../lib/scroll-anchor.js';
@@ -117,7 +117,7 @@
     // source values keep the results arrays and pick handlers separate.
     ...(activeTab === 0 && _cooktraceEnabled ? [{ value: 'ctpantry', label: 'CookTrace' }] : []),
     ...(activeTab === 2 && _cooktraceEnabled ? [{ value: 'cooktrace', label: 'CookTrace' }] : []),
-    ...(_tabHasShared  ? [{ value: 'shared', label: $_('foods.sources.from_others') }] : []),
+    ...(_tabHasShared && !$calmLook ? [{ value: 'shared', label: $_('foods.sources.from_others') }] : []),
   ];
   $: availableSources = _perSourceOptions.length >= 2
     ? [{ value: 'all', label: $_('foods.sources.all') }, ..._perSourceOptions]
@@ -604,7 +604,17 @@
   $: currentStore = TABS[activeTab].value;
   $: _ownList = activeTab === 0 ? localFoods : activeTab === 1 ? localMeals : localRecipes;
   $: _groupList = activeTab === 0 ? groupFoods : activeTab === 1 ? groupMeals : groupRecipes;
-  $: displayList = searchSource === 'shared' ? _groupList : _ownList;
+  // Calm look, household: what the other people on this server share with
+  // you sits in the same list as your own items (tagged "by <name>"),
+  // sorted together, instead of on a separate "From Others" shelf. Picking
+  // one logs it directly; it is not copied into your catalogue.
+  $: _sortMode = activeTab === 0 ? $foodsSort : activeTab === 1 ? $mealsSort : $recipesSort;
+  $: _householdList = ($calmLook && _tabHasShared)
+    ? _applySort([...(_ownList || []), ...(_groupList || [])], _sortMode)
+    : _ownList;
+  $: displayList = searchSource === 'shared' ? _groupList : _householdList;
+  let _householdLoadTried = false;
+  $: { if ($calmLook && _tabHasShared && !_householdLoadTried && !groupFoods.length && !groupMeals.length && !groupRecipes.length) { _householdLoadTried = true; loadGroupCatalogue(); } }
   $: { if (searchSource === 'shared' && _tabHasShared && !groupFoods.length && !groupMeals.length && !groupRecipes.length) loadGroupCatalogue(); }
   // 'all' mode (#96) needs the shared catalogue loaded too so shared items can
   // participate in the merged results without the user having to first flip
@@ -2266,7 +2276,7 @@
           {@const _localCount = (_ownList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length}
           {@const _sharedCount = _tabHasShared ? (_groupList || []).filter(f => search.trim() ? _fuzzyMatch(f, search) : false).length : 0}
           <div class="all-source-counts">
-            <span class="asc-chip"><span class="asc-dot asc-local"></span>Local · {_localCount}</span>
+            <span class="asc-chip"><span class="asc-dot asc-local"></span>Local · {_localCount + ($calmLook ? _sharedCount : 0)}</span>
             {#if _tabHasShared}
               <span class="asc-chip"><span class="asc-dot asc-shared"></span>Shared · {_sharedCount}</span>
             {/if}
