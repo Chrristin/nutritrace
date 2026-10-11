@@ -2416,6 +2416,9 @@
         </div>
       </div>
       {#if $calmLook}
+        <!-- Portalled to <body>: the page wrapper is transformed during route
+             transitions, which would make position:fixed scroll with the list. -->
+        <div use:portal class="calm-fab-layer">
         {#if _calmMenuOpen}
           <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
           <div class="calm-fab-scrim" on:click={() => _calmMenuOpen = false}></div>
@@ -2438,6 +2441,7 @@
           on:click={() => _calmMenuOpen = !_calmMenuOpen}>
           <span class="material-symbols-rounded">{_calmMenuOpen ? 'close' : 'add'}</span>
         </button>
+        </div>
       {/if}
     {/key}
 
