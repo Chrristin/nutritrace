@@ -80,7 +80,7 @@ export const USER_PREFS = new Set([
   'appriseUrl','appriseTag','gotifyUrl','gotifyToken','ntfyUrl','ntfyTopic','ntfyToken',
   // UI behavior prefs that should match across devices
   'accentColor','startPage','goalCelebrations','pageBanners','bannerStyle','bannerAnimation','language',
-  'calmLook',
+  'calmLook','householdMode',
 ]);
 
 // DEVICE_PREFS — local-only, never synced.
@@ -762,6 +762,10 @@ export const goalCelebrations   = createSettingStore('goalCelebrations',   true)
 // a one-time preset of existing display settings, applied when it is turned
 // on. Each preset setting stays individually adjustable afterwards.
 export const calmLook           = createSettingStore('calmLook',           false);
+// Household: shared foods, meals and recipes sit in one Household list
+// with your own shared items; private ones are Mine. Separate from Calm
+// look so either can be used alone. Settings > Sharing.
+export const householdMode      = createSettingStore('householdMode',      false);
 export function applyCalmPreset() {
   bannerStyle.set('off');
   showQuickCalories.set(false);

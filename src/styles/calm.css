@@ -226,6 +226,6 @@ html.calm, html.calm * {
 /* Household: your foods and those shared with you are one pantry, so in
    search they carry no LOCAL / SHARED badge ("by <name>" still says who
    added it) and no separate "Shared" count. Other sources keep theirs. */
-html.calm .source-badge-local,
-html.calm .source-badge-shared { display: none; }
-html.calm .asc-chip:has(.asc-shared) { display: none; }
+html.household .source-badge-local,
+html.household .source-badge-shared { display: none; }
+html.household .asc-chip:has(.asc-shared) { display: none; }

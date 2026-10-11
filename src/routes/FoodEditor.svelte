@@ -18,7 +18,7 @@
   import { takePhoto } from '../lib/camera.js';
   import { isNative } from '../lib/platform.js';
   import BarcodeScanner from '../components/foods/BarcodeScanner.svelte';
-  import { foodsShowCategories, foodsShowLabels, foodsShowNotes, foodCategories, visibleNutriments, nutrimentsOrder, customNutriments, cropPhotos, offUsername, offPassword, offUploadCountry, aiEffectivelyEnabled, envLocks, aiProvider, aiApiKey, aiModel, aiBaseUrl, energyUnit, showUnitMetadata, warnUnitMismatch, catName as _catName, catDisplay as _catDisplay, disableAnimations, calmLook } from '../stores/settings.js';
+  import { foodsShowCategories, foodsShowLabels, foodsShowNotes, foodCategories, visibleNutriments, nutrimentsOrder, customNutriments, cropPhotos, offUsername, offPassword, offUploadCountry, aiEffectivelyEnabled, envLocks, aiProvider, aiApiKey, aiModel, aiBaseUrl, energyUnit, showUnitMetadata, warnUnitMismatch, catName as _catName, catDisplay as _catDisplay, disableAnimations, householdMode } from '../stores/settings.js';
   import { callAI, callAIProxy } from '../lib/aiChat.js';
   import { fitImageDataUrl } from '../lib/image-fit.js';
   import { draftKey as _mkDraftKey, loadDraft, loadDraftImg, clearDraft, makeDebouncedPersist, sweepDrafts } from '../lib/editor-draft.js';
@@ -738,8 +738,8 @@
         if (Object.keys(flags).length) _nutrition._derived = flags;
       }
       const item = { ...food, nutrition: _nutrition };
-      // Calm look: new foods belong to the household unless kept as Mine.
-      if ($calmLook && !food.id && !item.visibility) item.visibility = 'group';
+      // Household mode: new foods belong to the household unless kept as Mine.
+      if ($householdMode && !food.id && !item.visibility) item.visibility = 'group';
       const saved = food.id
         ? await NtApi.updateFood(food.id, item)
         : await NtApi.createFood(item);
@@ -987,8 +987,8 @@
         <label class="form-label">{$_('food_editor.field_brand')}</label>
         <input class="input" placeholder={$_('food_editor.brand_placeholder')} bind:value={food.brand} />
       </div>
-      {#if $calmLook && !_readOnly}
-        <!-- Calm look, household: new foods go to the household; this keeps one to yourself. -->
+      {#if $householdMode && !_readOnly}
+        <!-- Household mode: new foods go to the household; this keeps one to yourself. -->
         <div class="form-group calm-mine-row" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px">
           <div>
             <div class="form-label" style="margin:0">{$_('food_editor.calm_mine')}</div>

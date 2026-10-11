@@ -6,7 +6,7 @@
   import { isNative, getServerUrl, apiUrl, getAuthToken } from '../../lib/platform.js';
   import { showSuccess, showError } from '../../stores/toast.js';
   import { currentUser, userMgmtActive } from '../../stores/auth.js';
-  import { defaultShareVisibility } from '../../stores/settings.js';
+  import { defaultShareVisibility, householdMode } from '../../stores/settings.js';
 
   // Native-standalone = Capacitor on-device with no linked server (nothing to
   // share with). Same rule the parent shell derives.
@@ -157,6 +157,20 @@
       </div>
     {/if}
     {#if adminSharingEnabled}
+    <!-- Household mode (personal build): one shared list instead of a
+         separate From Others shelf. Per user, synced. -->
+    <p class="settings-group-heading">{$_('settings_integrations.household')}</p>
+    <p class="settings-group-sub">{$_('settings_integrations.household_sub')}</p>
+    <div class="card settings-card">
+      <div class="setting-row">
+        <div>
+          <span class="setting-label">{$_('settings_integrations.household_toggle')}</span>
+          <span class="setting-desc">{$_('settings_integrations.household_desc')}</span>
+        </div>
+        <Toggle checked={$householdMode} on:change={e => householdMode.set(e.detail)} />
+      </div>
+    </div>
+
     <!-- Group: Auto Share (#183). Per-user forward-looking default,
          parallel to the Bulk Share block below (retroactive). Every
          authenticated user sees this, not just admins. Server-side

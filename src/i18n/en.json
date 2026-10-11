@@ -1131,6 +1131,10 @@
     "full_name": "Full Name"
   },
   "settings_integrations": {
+    "household": "Household",
+    "household_sub": "For people who cook and eat together. Shared foods, meals and recipes become one list instead of a separate From Others shelf.",
+    "household_toggle": "Household mode",
+    "household_desc": "Foods show as Household (everything shared) and Mine (kept private). New foods are shared unless you mark them Mine only. Picking a shared food logs it without copying it.",
     "group": "Integrations",
     "enable_usda": "Enable USDA FoodData",
     "mealie_section": "Mealie",

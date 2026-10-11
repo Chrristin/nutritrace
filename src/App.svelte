@@ -14,7 +14,7 @@
   import { DB, localDateStr } from './lib/db.js';
   import { currentDate, loadEntry } from './stores/diary.js';
   import { reloadSettingStores } from './stores/settings.js';
-  import { calmLook, navStyle, applyAccentColor, accentColor, applyAppearance, appearance, disableAnimations, sidebarPersistent, language, pageBanners, bannerStyle, bannerAnimation, forceMobileLayout } from './stores/settings.js';
+  import { calmLook, householdMode, navStyle, applyAccentColor, accentColor, applyAppearance, appearance, disableAnimations, sidebarPersistent, language, pageBanners, bannerStyle, bannerAnimation, forceMobileLayout } from './stores/settings.js';
   import { locale, _ } from 'svelte-i18n';
   import { currentUser, userMgmtActive, setupRequired, loadAuthState, handleOidcCallback } from './stores/auth.js';
   import { needsNativeSetup, isNative, getNativeMode, getServerUrl, apiUrl, getAuthToken } from './lib/platform.js';
@@ -316,6 +316,7 @@
   // Calm look (src/styles/calm.css)
   $: if (typeof document !== 'undefined') {
     document.documentElement.classList.toggle('calm', !!$calmLook);
+    document.documentElement.classList.toggle('household', !!$householdMode);
   }
   // Apply/remove no-animations class when setting changes
   $: if (typeof document !== 'undefined') {
