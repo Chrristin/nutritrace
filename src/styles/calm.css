@@ -213,3 +213,12 @@ html.calm[data-theme="light"] .calm-fab-menu { background: #FFFFFF; }
 
 /* Dark: no highlight pill behind the active bottom-nav tab; colour alone marks it */
 html.calm[data-theme="dark"] .nav-pill { display: none; }
+
+/* Scrollbars (desktop): thin, no arrows, low-contrast thumb, invisible
+   track. The standard properties win over ::-webkit-scrollbar in current
+   Chrome/Edge, which otherwise falls back to the classic Windows bar on
+   some inner panes. */
+html.calm, html.calm * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 127, 127, 0.35) transparent;
+}
