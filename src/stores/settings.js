@@ -766,7 +766,6 @@ export function applyCalmPreset() {
   bannerStyle.set('off');
   showQuickCalories.set(false);
   diaryShowMacroSummary.set(false);
-  foodsShowThumbnails.set(false);
   foodsDefaultSource.set('all');
 }
 

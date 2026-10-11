@@ -965,6 +965,16 @@
     if (!_lastLoadedNotes) notesExpanded = false;
   }
   function toggleNotes() { notesExpanded = !notesExpanded; }
+  // Calm look: the floating + lists meals with nothing logged yet and Day
+  // notes. Meals that already have food keep their own "Add Food" row.
+  let _notesEl = null;
+  let _calmMenuOpen = false;
+  async function _calmOpenNotes() {
+    _calmMenuOpen = false;
+    notesExpanded = true;
+    await tick();
+    _notesEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
   async function commitNotes() {
     if ((_notesText || '') === (entry?.notes || '')) return;
     _notesSaving = true;
@@ -2405,17 +2415,29 @@
           {/each}
         </div>
       </div>
-      {#if _calmHiddenMeals.length > 0}
-        <div class="calm-add-meal">
-          <span class="calm-add-meal-label">{$_('diary.calm.add_meal')}</span>
-          <div class="calm-add-meal-chips">
+      {#if $calmLook}
+        {#if _calmMenuOpen}
+          <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+          <div class="calm-fab-scrim" on:click={() => _calmMenuOpen = false}></div>
+          <div class="calm-fab-menu" role="menu">
             {#each _calmHiddenMeals as m (m.mealIdx)}
-              <button type="button" class="calm-add-meal-chip" on:click={() => openAddFood(m.mealIdx)}>
+              <button type="button" role="menuitem" class="calm-fab-item" on:click={() => { _calmMenuOpen = false; openAddFood(m.mealIdx); }}>
                 <span class="material-symbols-rounded">add</span>{m.meal}
               </button>
             {/each}
+            {#if $diaryShowNotes}
+              {#if _calmHiddenMeals.length > 0}<div class="calm-fab-sep"></div>{/if}
+              <button type="button" role="menuitem" class="calm-fab-item" on:click={_calmOpenNotes}>
+                <span class="material-symbols-rounded">edit_note</span>{$_('diary_deep.day_notes')}
+              </button>
+            {/if}
           </div>
-        </div>
+        {/if}
+        <button type="button" class="calm-fab" class:open={_calmMenuOpen}
+          aria-label={$_('diary.calm.add_meal')} aria-expanded={_calmMenuOpen}
+          on:click={() => _calmMenuOpen = !_calmMenuOpen}>
+          <span class="material-symbols-rounded">{_calmMenuOpen ? 'close' : 'add'}</span>
+        </button>
       {/if}
     {/key}
 
@@ -2485,8 +2507,8 @@
       </section>
     {/if}
 
-    {#if $diaryShowNotes}
-      <section class="diary-notes card" class:expanded={notesExpanded || _notesText}>
+    {#if $diaryShowNotes && (!$calmLook || notesExpanded)}
+      <section bind:this={_notesEl} class="diary-notes card" class:expanded={notesExpanded || _notesText}>
         <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
         <div class="diary-notes-header" on:click={toggleNotes}>
           <span class="material-symbols-rounded diary-notes-icon">edit_note</span>
@@ -2614,7 +2636,11 @@
   <!-- Text summary row — taps to expand/collapse -->
   <button class="dbb-summary-row" on:click={() => barExpanded = !barExpanded}
     aria-label="{barExpanded ? 'Collapse' : 'Expand'} nutrition panel">
+    {#if $calmLook}
+    <span class="dbb-summary-text calm-sum"><span><b>{Math.round(totals?.proteins || 0)}g</b> {$_('diary.calm.protein')}</span><span><b>{Math.round(totals?.carbohydrates || 0)}g</b> {$_('diary.calm.carbs')}</span><span><b>{Math.round(totals?.fat || 0)}g</b> {$_('diary.calm.fat')}</span><span class="calm-sum-kcal"><b>{_sumEnergy.value.toLocaleString()}</b> {_sumEnergy.unit}</span></span>
+    {:else}
     <span class="dbb-summary-text"><span style="color:var(--macro-protein)">{_mp.protein}% P</span> · <span style="color:var(--macro-carbs)">{_mp.carbs}% C</span> · <span style="color:var(--macro-fat)">{_mp.fat}% F</span> · <span style="color:var(--macro-calories)">{_sumEnergy.value.toLocaleString()} {_sumEnergy.unit}</span>{#if _waterShowInDiary} · <span style="color:var(--water-blue)"><span class="material-symbols-rounded" style="font-size:14px;vertical-align:middle">water_drop</span> {_waterDisplay(_waterTotal)}</span>{/if}</span>
+    {/if}
     <span class="dbb-chevron material-symbols-rounded">{barExpanded ? 'expand_more' : 'expand_less'}</span>
   </button>
 

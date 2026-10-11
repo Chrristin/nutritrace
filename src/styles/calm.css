@@ -49,19 +49,12 @@ html.calm .meal-add-row {
   color: var(--accent);
 }
 
-/* Foods: a list, not a stack of cards */
-html.calm .food-list { gap: 0; }
-html.calm .food-list .food-item {
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  box-shadow: none;
-  background: transparent;
-}
-html.calm .food-list .food-item:first-child { border-top: 1px solid var(--border); }
-html.calm .food-list .food-item-btn { padding: 12px 4px; }
+/* Foods: a plain list, no dividers; real photos show, placeholder tiles don't */
+html.calm .food-list { gap: 2px; }
+html.calm .food-list .food-item { box-shadow: none; }
+html.calm .food-list .food-item-btn { padding: 12px 14px; }
 html.calm .food-name { font-size: 15px; }
-/* No placeholder tiles in the food list either; real photos still show */
+html.calm .food-thumb { border-radius: 10px; width: 44px; height: 44px; }
 html.calm .food-thumb-placeholder { display: none; }
 
 /* Portion sheet: the "Total amount" row restates the two fields above it.
@@ -84,9 +77,14 @@ html.calm .qty-macro-pill:first-child .qty-macro-val { color: var(--accent) !imp
    the macros to soft, related tones and lifts secondary text so it reads. */
 html.calm[data-theme="dark"],
 html.calm [data-theme="dark"] {
-  --text-2: rgba(240, 242, 248, 0.80);
-  --text-3: rgba(240, 242, 248, 0.62);
-  --border: rgba(255, 255, 255, 0.06);
+  /* Pure black page; cards take the page colour so no boxes show */
+  --bg: #000000;
+  --surface-1: #000000;
+  --surface-2: #161616;
+  --surface-3: #1E1E1E;
+  --glass-surface: #000000;
+  --text-2: rgba(242, 242, 242, 0.80);
+  --text-3: rgba(242, 242, 242, 0.62);
   --macro-protein:  #B9B4D6;
   --macro-carbs:    #A9C7B5;
   --macro-fat:      #D9C3A0;
@@ -98,6 +96,7 @@ html.calm [data-theme="dark"] {
 }
 html.calm[data-theme="light"],
 html.calm [data-theme="light"] {
+  --bg: #F6F4EF;
   --text-2: rgba(13, 15, 20, 0.74);
   --text-3: rgba(13, 15, 20, 0.56);
   --macro-protein:  #6E668F;
@@ -131,22 +130,86 @@ html.calm .dbb-macro-bar,
 html.calm .dbb-water-strip { display: none; }
 html.calm .dbb-progress-fill { background: var(--accent) !important; }
 
-/* "Add a meal" row (Diary.svelte, calm only) */
-.calm-add-meal { display: flex; flex-direction: column; gap: 10px; padding: 6px 4px 20px; }
-.calm-add-meal-label { font-size: 13px; color: var(--text-3); padding-left: 4px; }
-.calm-add-meal-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.calm-add-meal-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 8px 14px 8px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-1);
-  color: var(--text-1);
-  font: inherit; font-size: 14px;
-  cursor: pointer;
-}
-.calm-add-meal-chip .material-symbols-rounded { font-size: 18px; color: var(--accent); }
-
 /* Date arrows and Day Notes: no tinted tiles, no accent edge */
 html.calm .diary-date-bar .btn-icon { background: none; box-shadow: none; border: none; }
 html.calm .diary-notes { border-left: none; }
+
+/* ── No divider lines anywhere ──────────────────────────────────────────
+   Every component draws its separators with --border / --border-strong,
+   so clearing them removes lines app-wide. Text fields and dropdowns get
+   their own faint outline back: an empty input on black is otherwise
+   invisible. */
+html.calm { --border: transparent; --border-strong: transparent; }
+html.calm[data-theme="dark"] .input,
+html.calm[data-theme="dark"] .select,
+html.calm[data-theme="dark"] textarea { border: 1px solid rgba(255, 255, 255, 0.12); }
+html.calm[data-theme="light"] .input,
+html.calm[data-theme="light"] .select,
+html.calm[data-theme="light"] textarea { border: 1px solid rgba(0, 0, 0, 0.12); }
+html.calm .input:focus, html.calm .select:focus, html.calm textarea:focus { border-color: var(--accent); }
+html.calm .card { border: none; }
+html.calm[data-theme="dark"] .card { box-shadow: none; }
+/* Sheets and popups need to stand off the black page */
+html.calm[data-theme="dark"] .sheet-panel { background: #121212; }
+
+/* Hamburger: a plain icon, no pill */
+html.calm .hamburger {
+  background: none;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--text-1);
+}
+html.calm .hamburger:hover { background: none; }
+
+/* Bottom summary in grams */
+.calm-sum { display: flex; justify-content: space-between; gap: 10px; width: 100%; color: var(--text-2); }
+.calm-sum b { color: var(--text-1); font-weight: 600; }
+.calm-sum-kcal b { color: var(--accent); }
+
+/* Floating + (Diary, calm only). Sits where the assistant button sat. */
+.calm-fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--nav-h, 64px) + var(--safe-bottom, 0px) + 72px);
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  z-index: 45;
+  cursor: pointer;
+}
+.calm-fab .material-symbols-rounded { font-size: 30px; }
+.calm-fab-scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 44; }
+.calm-fab-menu {
+  position: fixed;
+  right: 18px;
+  bottom: calc(var(--nav-h, 64px) + var(--safe-bottom, 0px) + 140px);
+  min-width: 210px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  z-index: 45;
+  display: flex; flex-direction: column;
+}
+html.calm[data-theme="light"] .calm-fab-menu { background: #FFFFFF; }
+.calm-fab-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  border: none; background: none;
+  color: var(--text-1);
+  font: inherit; font-size: 16px; text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.calm-fab-item:active { background: var(--surface-3); }
+.calm-fab-item .material-symbols-rounded { font-size: 20px; color: var(--accent); }
+.calm-fab-sep { height: 1px; margin: 4px 10px; background: rgba(127, 127, 127, 0.25); }
+
+/* Dark: no highlight pill behind the active bottom-nav tab; colour alone marks it */
+html.calm[data-theme="dark"] .nav-pill { display: none; }

@@ -110,7 +110,7 @@
       "accent_color": "Accent Color",
       "navigation_style": "Navigation Style",
       "calm_look": "Calm look",
-      "calm_look_desc": "A quieter Diary and Foods page: no header banner, no quick-calories button, one way to add food, and your own foods first in the picker. Turning it on also adjusts a few Diary and Foods settings, which you can change back individually."
+      "calm_look_desc": "A quieter Diary and Foods page: no header banner, no quick-calories button, no divider lines, a floating + for meals not logged yet, and your own foods first in the picker. Turning it on also adjusts a few Diary and Foods settings, which you can change back individually."
     },
     "regional": {
       "section": "Regional & Units",
@@ -651,7 +651,10 @@
   },
   "diary": {
     "calm": {
-      "add_meal": "Add a meal"
+      "add_meal": "Add a meal",
+      "protein": "protein",
+      "carbs": "carbs",
+      "fat": "fat"
     },
     "add_food": "Add Food",
     "notes_placeholder": "How did today feel? Sleep, energy, hunger, cravings…",
