@@ -1016,8 +1016,10 @@ async function _freshenItemImages(items) {
     // downstream, but SQLite LIKE / lower() would defeat any index, so we
     // send both cases the caller might store and normalise in JS.
     const foodIds = new Set();
+    const foodServerIds = new Set();
     const foodNames = new Set();
     const mealIds = new Set();
+    const mealServerIds = new Set();
     const mealNames = new Set();
     for (const it of items) {
       if (!it) continue;
@@ -1030,40 +1032,48 @@ async function _freshenItemImages(items) {
       const nameKey = String(it.name || '').trim();
       if (it.is_recipe) {
         if (typeof it.id === 'number') mealIds.add(it.id);
-        if (typeof it.food_server_id === 'number') mealIds.add(it.food_server_id);
+        // food_server_id is the SERVER's id: match it against server_id,
+        // not the local autoincrement id (they differ after a reinstall).
+        if (typeof it.food_server_id === 'number') mealServerIds.add(it.food_server_id);
         if (nameKey) mealNames.add(nameKey);
       } else {
         if (typeof it.id === 'number') foodIds.add(it.id);
-        if (typeof it.food_server_id === 'number') foodIds.add(it.food_server_id);
+        if (typeof it.food_server_id === 'number') foodServerIds.add(it.food_server_id);
         if (nameKey) foodNames.add(nameKey);
       }
     }
 
     // Fast path: nothing to look up. Return items with empty imgUrl so
     // the downstream image-cache falls back to placeholder rendering.
-    if (!foodIds.size && !foodNames.size && !mealIds.size && !mealNames.size) {
+    if (!foodIds.size && !foodServerIds.size && !foodNames.size && !mealIds.size && !mealServerIds.size && !mealNames.size) {
       return items.map(it => ({ ...it, imgUrl: '' }));
     }
 
     const db = await getDb();
 
-    async function _lookupPool(table, ids, names, extraCols) {
-      if (!ids.size && !names.size) return [];
+    async function _lookupPool(table, ids, serverIds, names, extraCols) {
+      if (!ids.size && !serverIds.size && !names.size) return [];
       const conds = [];
       const params = [];
       if (ids.size) {
         conds.push(`id IN (${Array.from(ids).map(() => '?').join(',')})`);
         params.push(...ids);
       }
+      if (serverIds.size) {
+        conds.push(`server_id IN (${Array.from(serverIds).map(() => '?').join(',')})`);
+        params.push(...serverIds);
+      }
       if (names.size) {
         // Case-insensitive name match: SQLite's default LIKE/=  is
         // case-sensitive for non-ASCII text and case-insensitive for
         // ASCII only. Use COLLATE NOCASE = to get the same normalisation
         // the JS-side _norm() applies (lowercased trim).
-        conds.push(`name COLLATE NOCASE IN (${Array.from(names).map(() => '?').join(',')})`);
+        // TRIM: names saved with a trailing space ("Slim Milk ") must still
+        // match the trimmed key, as the server-side lookup does.
+        conds.push(`TRIM(name) COLLATE NOCASE IN (${Array.from(names).map(() => '?').join(',')})`);
         params.push(...names);
       }
-      const cols = ['id', 'name', ...extraCols, 'img_url'].join(', ');
+      const cols = ['id', 'server_id', 'name', ...extraCols, 'img_url'].join(', ');
       const r = await db.query(
         `SELECT ${cols} FROM ${table}
          WHERE deleted_at IS NULL
@@ -1077,32 +1087,38 @@ async function _freshenItemImages(items) {
     }
 
     const [foods, meals] = await Promise.all([
-      _lookupPool('foods', foodIds, foodNames, ['brand']),
-      _lookupPool('meals', mealIds, mealNames, []),
+      _lookupPool('foods', foodIds, foodServerIds, foodNames, ['brand']),
+      _lookupPool('meals', mealIds, mealServerIds, mealNames, []),
     ]);
     const foodByIdName = new Map();
+    const foodByServerIdName = new Map();
     const foodByNameBrand = new Map();
     const foodByName = new Map();
     for (const r of foods) {
       foodByIdName.set(`${r.id}|${_norm(r.name)}`, r.img_url);
+      if (r.server_id != null) foodByServerIdName.set(`${r.server_id}|${_norm(r.name)}`, r.img_url);
       foodByNameBrand.set(`${_norm(r.name)}|${_norm(r.brand)}`, r.img_url);
       if (!foodByName.has(_norm(r.name))) foodByName.set(_norm(r.name), r.img_url);
     }
     const mealByIdName = new Map();
+    const mealByServerIdName = new Map();
     const mealByName = new Map();
     for (const r of meals) {
       mealByIdName.set(`${r.id}|${_norm(r.name)}`, r.img_url);
+      if (r.server_id != null) mealByServerIdName.set(`${r.server_id}|${_norm(r.name)}`, r.img_url);
       if (!mealByName.has(_norm(r.name))) mealByName.set(_norm(r.name), r.img_url);
     }
     return items.map(it => {
       const name = _norm(it.name);
       const brand = _norm(it.brand);
       const idKey = `${it.id}|${name}`;
+      const serverKey = `${it.food_server_id}|${name}`;
       let live;
       if (it.is_recipe) {
-        live = mealByIdName.get(idKey) || mealByName.get(name) || '';
+        live = mealByIdName.get(idKey) || mealByServerIdName.get(serverKey) || mealByName.get(name) || '';
       } else {
         live = foodByIdName.get(idKey)
+          || foodByServerIdName.get(serverKey)
           || foodByNameBrand.get(`${name}|${brand}`)
           || foodByName.get(name)
           || '';
