@@ -2421,7 +2421,7 @@
         <div use:portal class="calm-fab-layer">
         {#if _calmMenuOpen}
           <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-          <div class="calm-fab-scrim" on:click={() => _calmMenuOpen = false}></div>
+          <div class="calm-fab-scrim" use:closeOnBack={() => _calmMenuOpen = false} on:click={() => _calmMenuOpen = false}></div>
           <div class="calm-fab-menu" role="menu">
             {#each _calmHiddenMeals as m (m.mealIdx)}
               <button type="button" role="menuitem" class="calm-fab-item" on:click={() => { _calmMenuOpen = false; openAddFood(m.mealIdx); }}>
